@@ -335,7 +335,6 @@ public class ScrollViewScript : UIScript
                 - UIRectTransform.sizeDelta.y;
             fixedMaxCount = MaxCellCountX;
         }
-        Debug.Log(standardAxisPosition);
         if ((ScrolledLineCount+1)*(standardSize+standardSpace) 
             <= standardAxisPosition)
         {
