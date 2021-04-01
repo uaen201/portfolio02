@@ -7,11 +7,31 @@ using UnityEngine.UI;
 public class OperatorInfo : UIScript
 {
     [SerializeField]
-    private Text Level;
+    private Image SkinImage;
+    [SerializeField]
+    private Image ShineImage;
+    [SerializeField]
+    private Image BandImage;
+    [SerializeField]
+    private Image PositionImage;
+    [SerializeField]
+    private Image RarityImage;
+    [SerializeField]
+    private Image EXPImage;
+    [SerializeField]
+    private Text LevelText;
+    [SerializeField]
+    private Image PotentialImage;
+    [SerializeField]
+    private Image DefaultSkillImage;
+    [SerializeField]
+    private Text NameText;
+    [SerializeField]
+    private Image EliteImage;
 
     public void SetLevel(int level)
     {
-        Level.text = level.ToString();
+        LevelText.text = level.ToString();
     }
     public override void updateData(int level)
     {
@@ -30,7 +50,12 @@ public class OperatorInfo : UIScript
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    public void OnClick()
+    {
+        Debug.Log("click");
     }
 
     private void initialize()

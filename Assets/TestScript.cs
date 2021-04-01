@@ -5,27 +5,31 @@ using UnityEngine;
 public class TestScript : UIScript
 {
     [SerializeField]
-    private RectTransform parent;
+    Camera maincam;
     // Start is called before the first frame update
     void Start()
     {
         
     }
-
+    
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKey(KeyCode.D))
+        {
+            Vector3 euler = maincam.transform.rotation.eulerAngles;
+            euler.y = euler.y +1;
+            maincam.transform.rotation = Quaternion.Euler(euler);
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            Vector3 euler = maincam.transform.rotation.eulerAngles;
+            euler.y = euler.y - 1;
+            maincam.transform.rotation = Quaternion.Euler(euler);
+        }
     }
     public void set()
     {
-        Debug.Log("click");
-
-        UIRectTransform.SetParent(null);
-        Vector3 pos = UIRectTransform.localPosition;
-        pos.y = 0;
-        pos.x = 0;
-        UIRectTransform.SetParent(parent);
-        UIRectTransform.localPosition = pos;
     }
 }
