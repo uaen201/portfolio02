@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 /*
@@ -8,9 +9,38 @@ using UnityEngine;
 public class BattleSystem : MonoBehaviour
 {
     //- 오퍼 목록
-    private List<TestScript> OperatorList = new List<TestScript>();
+    private List<CharacterScript> OperatorList = new List<CharacterScript>();
     //- 적목록
     private List<TestEnemy> EnemyList = new List<TestEnemy>();
+    private GameObject RangePlanePrefab;
+    private struct RangePlaneData
+    {
+        public RangePlane rangePlaneScript;
+        public GameObject rangePlaneObject;
+    }
+    //- 범위
+    [SerializeField]
+    private List<RangePlaneData> RangeList = new List<RangePlaneData>();
+     
+    private void Awake()
+    {
+        RangePlanePrefab = 
+            AssetDatabase.LoadAssetAtPath
+            ("Assets/Prefabs/RangePlane.prefab",typeof(GameObject)) as GameObject;
+        for(int i = 0; i < 50; i++)
+        {
+            AddNewRangePlane();
+        }
+    }
+
+    private void AddNewRangePlane()
+    {
+        RangePlaneData newRangePlane = new RangePlaneData();
+        newRangePlane.rangePlaneObject = Instantiate(RangePlanePrefab);
+        newRangePlane.rangePlaneScript = newRangePlane.rangePlaneObject.GetComponent<RangePlane>();
+        newRangePlane.rangePlaneScript.GetMeshRenderer().enabled = false;
+        RangeList.Add(newRangePlane);
+    }
 
     public void AddEnemyOnOperatorRange(GameObject oper, GameObject enemy)
     {
@@ -69,7 +99,7 @@ public class BattleSystem : MonoBehaviour
     {
 
     }    
-    public void AddOperator(TestScript character)
+    public void AddOperator(CharacterScript character)
     {
         OperatorList.Add(character);
     }

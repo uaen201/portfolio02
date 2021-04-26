@@ -10,10 +10,21 @@ public class RangePlane : MonoBehaviour
 {
     [SerializeField]
     private Transform MyTransform;
+    [SerializeField]
+    private MeshRenderer MyMeshRenderer;
     private void Awake()
     {
         MyTransform = gameObject.transform;
     }
+
+    public MeshRenderer GetMeshRenderer() { return MyMeshRenderer; }
+    public Transform GetTransform() { return MyTransform; }
+
+    public void SetRangeVisible(bool isVisible)
+    {
+        MyMeshRenderer.enabled = isVisible;
+    }
+    public bool IsRangeVisible() { return MyMeshRenderer.enabled; }
 
     private void OnTriggerEnter(Collider other)
     {
