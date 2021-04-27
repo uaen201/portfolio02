@@ -55,6 +55,25 @@ public class OperatorData
     [SerializeField]
     private int Resistance = 5;
 
+    public void Initialize(OperatorData data)
+    {
+        Position = data.Position;
+        Rarity = data.Rarity;
+        Reliability = data.Reliability;
+        Potential = data.Potential;
+        Elite = data.Elite;
+        Name = data.Name;
+        Level = data.Level;
+        MaxEXP = data.MaxEXP;
+        EXP = data.EXP;
+        Cost = data.Cost;
+        MaxHP = data.MaxHP;
+        HP = data.HP;
+        Defense = data.Defense;
+        Attack = data.Attack;
+        Resistance = data.Resistance;
+    }
+
     public OperatorPosition GetOperatorPosition()   {   return Position;    }
     public byte GetRarity()         { return Rarity;    }
     public byte GetReliability()    { return Reliability; }

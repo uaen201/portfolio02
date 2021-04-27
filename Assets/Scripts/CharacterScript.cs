@@ -33,6 +33,8 @@ public class CharacterScript : MonoBehaviour
 
     protected CharacterResourceData ResourceInfo = new CharacterResourceData();
 
+    protected Attack AttackData = new Attack();
+
     private void Awake()
     {
         //GameManager.Instance.GetBattleSystem().AddOperator(this);
@@ -41,9 +43,20 @@ public class CharacterScript : MonoBehaviour
     private void Start()
     {
     }
+    public Attack GetAttackData()
+    {
+        return AttackData;
+    }
     public CharacterResourceData GetCharacterResourceInfo()
     {
         return ResourceInfo;
+    }
+    public void ApplyResourceData()
+    {
+        SetSkeletonDataAsset(ResourceInfo.GetSpineDataPath());
+        /*
+         * 다른 리소스들 추가되면 추가
+         */
     }
     public void SetSkeletonDataAsset(string filePath)
     {

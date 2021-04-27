@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -12,6 +13,8 @@ public class CharacterSetting : MonoBehaviour
 {
     [SerializeField]
     private OperatorCharacter Character;
+    [SerializeField]
+    private InputField CharacterFileName;
     [Header("Tab")]
     [SerializeField]
     private Toggle AttackDataToggle;
@@ -45,6 +48,22 @@ public class CharacterSetting : MonoBehaviour
     private InputField TrailMaterialName;
     [Space(10f)]
     [Header("Character Data")]
+    [SerializeField]
+    private InputField OperatorName;
+    [SerializeField]
+    private Dropdown OperatorPosition;
+    [SerializeField]
+    private InputField OperatorRarity;
+    [SerializeField]
+    private InputField OperatorCost;
+    [SerializeField]
+    private InputField OperatorHP;
+    [SerializeField]
+    private InputField OperatorDefense;
+    [SerializeField]
+    private InputField OperatorDamage;
+    [SerializeField]
+    private InputField OperatorResistance;
     //- 범위
     private List<RangePlane> RangeList = new List<RangePlane>();
 
@@ -66,29 +85,130 @@ public class CharacterSetting : MonoBehaviour
         CharacterDataTab.SetActive(false);
         StartCoroutine(RangePlaneOnOff());
     }
-    /*
-     * save load 테스트
-     */
-    public void Test()
+    public void SaveData()
     {
-        string jsonData =JsonUtility.ToJson(Character.GetCharacterResourceInfo());
+        string jsonData = "";
         string path = Application.streamingAssetsPath;
-        Debug.Log(jsonData);
-        path = path.Substring(0, path.LastIndexOf('/')+1);
-        path += "Test.json";
-        Debug.Log(path);
-        File.WriteAllText(path, jsonData);
+        path = path.Substring(0, path.LastIndexOf('/'));
+        path = EditorUtility.OpenFolderPanel("Find Save Folder", path, "");
+        
+        if (path == "")
+        {
+            return;
+        }
+
+        //-
+        Attack.AttackType saveAttackType = Attack.AttackType.Melee;
+        switch(AttackType.options[AttackType.value].text)
+        {
+            case "Melee":
+                saveAttackType = Attack.AttackType.Melee;
+                break;
+            case "Bullet":
+                saveAttackType = Attack.AttackType.Bullet;
+                break;
+            case "Mix":
+                saveAttackType = Attack.AttackType.Mix;
+                break;
+            case "Heal":
+                saveAttackType = Attack.AttackType.Heal;
+                break;
+        }
+        Character.GetAttackData().Initialize(RangeSize.Width, RangeSize.Height,
+            RangeCenter.X, RangeCenter.Y, float.Parse(OperatorDamage.text), saveAttackType);
+
+        for (int i = 0; i < RangeSize.Height; i++)
+        {
+            for (int j = 0; j < RangeSize.Width; j++)
+            {
+                Character.GetAttackData().SetRangeReal(j,i,RangeList[i * RangeSize.Width + j].GetMeshRenderer().enabled);
+            }
+        }
+        //-
+        OperatorData operData = Character.GetOperatorData();
+        operData.SetName(OperatorName.text);
+        operData.SetOperatorPosition((OperatorData.OperatorPosition)OperatorPosition.value);
+        operData.SetRarity(byte.Parse(OperatorRarity.text));
+        operData.SetCost(short.Parse(OperatorCost.text));
+        operData.SetMaxHP(int.Parse(OperatorHP.text));
+        operData.SetHP(int.Parse(OperatorHP.text));
+        operData.SetDefense(int.Parse(OperatorDefense.text));
+        operData.SetAttack(int.Parse(OperatorDamage.text));
+        operData.SetResistance(int.Parse(OperatorResistance.text));
+        //-
+
+        jsonData = JsonUtility.ToJson(Character.GetCharacterResourceInfo());
+        File.WriteAllText(path + "/"+ CharacterFileName.text+"_" + Character.GetCharacterResourceInfo().ToString() + ".json", jsonData);
+        jsonData = JsonUtility.ToJson(Character.GetOperatorData());
+        File.WriteAllText(path + "/" + CharacterFileName.text + "_" + Character.GetOperatorData().ToString() + ".json", jsonData);
+        jsonData = JsonUtility.ToJson(Character.GetAttackData());
+        File.WriteAllText(path + "/" + CharacterFileName.text + "_" + Character.GetAttackData().ToString() + ".json", jsonData);
     }
-    public void Test2()
+    public void LoadData()
     {
+        string resourceData = "";
+        string operatorData = "";
+        string attackData = "";
         string path = Application.streamingAssetsPath;
-        path = path.Substring(0, path.LastIndexOf('/') + 1);
-        path += "Test.json";
-        string jsonData = File.ReadAllText(path);
-        CharacterResourceData temp = JsonUtility.FromJson<CharacterResourceData>(jsonData);
-        SpineDataName.text = temp.GetSpineDataPath().Substring(temp.GetSpineDataPath().LastIndexOf('/'));
-        HitEffectName.text = temp.GetHitEffectPath().Substring(temp.GetHitEffectPath().LastIndexOf('/'));
-        TrailMaterialName.text = temp.GetTrailMaterialPath().Substring(temp.GetTrailMaterialPath().LastIndexOf('/'));
+        path = path.Substring(0, path.LastIndexOf('/'));
+        path = EditorUtility.OpenFolderPanel("Find Load Folder", path, "");
+
+        if (path == "")
+        {
+            return;
+        }
+        string characterName = path.Substring(path.LastIndexOf('/')+1);
+        resourceData = File.ReadAllText(path + "/" + characterName + "_" + Character.GetCharacterResourceInfo().ToString() + ".json");
+        if(resourceData == "")
+        {
+            return;
+        }
+        operatorData = File.ReadAllText(path + "/" + characterName + "_" + Character.GetOperatorData().ToString() + ".json");
+        if (operatorData == "")
+        {
+            return;
+        }
+        attackData = File.ReadAllText(path + "/" + characterName + "_" + Character.GetAttackData().ToString() + ".json");
+        if (attackData == "")
+        {
+            return;
+        }
+        Character.GetCharacterResourceInfo().Initialize(JsonUtility.FromJson<CharacterResourceData>(resourceData));
+        Character.GetOperatorData().Initialize(JsonUtility.FromJson<OperatorData>(operatorData));
+        Character.GetAttackData().Initialize(JsonUtility.FromJson<Attack>(attackData));
+        Attack attack = Character.GetAttackData();
+        CharacterResourceData resource = Character.GetCharacterResourceInfo();
+        OperatorData oper = Character.GetOperatorData();
+        RangeXCount.text = System.Convert.ToString(attack.GetRangeCountX());
+        RangeZCount.text = System.Convert.ToString(attack.GetRangeCountZ());
+        RangeCenterX.text = System.Convert.ToString(attack.GetRangeCenterX());
+        RangeCenterZ.text = System.Convert.ToString(attack.GetRangeCenterZ());
+        CharacterFileName.text = characterName;
+        SpineDataName.text = resource.GetSpineDataPath().Substring(resource.GetSpineDataPath().LastIndexOf('/')+1);
+        HitEffectName.text = resource.GetHitEffectPath().Substring(resource.GetHitEffectPath().LastIndexOf('/') + 1);
+        TrailMaterialName.text = resource.GetTrailMaterialPath().Substring(resource.GetTrailMaterialPath().LastIndexOf('/') + 1);
+        AttackType.value = (int)attack.GetAttackType();
+        Character.ApplyResourceData();
+        Character.AddAnimation("Start", false);
+        Character.AddAnimation("Idle", true);
+        
+        for(int i = 0; i < RangeSize.Height; i++)
+        {
+            for(int j = 0; j < RangeSize.Width; j++)
+            {
+                RangeList[i * RangeSize.Width + j].SetRangeVisible(attack.GetRangeReal(i,j));
+            }
+        }
+
+
+        OperatorName.text = oper.GetName();
+        OperatorPosition.value = (int)oper.GetOperatorPosition();
+        OperatorRarity.text = System.Convert.ToString(oper.GetRarity());
+        OperatorCost.text = System.Convert.ToString(oper.GetCost());
+        OperatorHP.text = System.Convert.ToString(oper.GetHP());
+        OperatorDefense.text = System.Convert.ToString(oper.GetDefense());
+        OperatorDamage.text = System.Convert.ToString(oper.GetAttack());
+        OperatorResistance.text = System.Convert.ToString(oper.GetResistance());
     }
     public void LoadSpineData()
     {

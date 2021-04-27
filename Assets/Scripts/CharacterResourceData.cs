@@ -14,6 +14,14 @@ public class CharacterResourceData
     [SerializeField]
     private string TrailMaterialPath = "";
 
+    public void Initialize(CharacterResourceData data)
+    {
+        SpineDataPath = data.SpineDataPath;
+        HitEffectPath = data.HitEffectPath;
+        BulletPath = data.BulletPath;
+        TrailMaterialPath = data.TrailMaterialPath;
+    }
+
     public void SetSpineDataPath(string path)
     {
         SpineDataPath = path;
